@@ -6,11 +6,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { ArrowLeft, Copy, Send, CheckCircle, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Copy, Send, CheckCircle, Loader2, ExternalLink, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,9 @@ export default function LetterViewPage() {
   const queryClient = useQueryClient();
   const [sending, setSending] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const { data: letterData, isLoading } = useQuery({
     queryKey: ["letter", id],
@@ -100,6 +105,25 @@ export default function LetterViewPage() {
       toast.error(err instanceof Error ? err.message : "Send failed");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleSaveTemplate() {
+    if (!letter || !templateName.trim()) return;
+    setSavingTemplate(true);
+    try {
+      await api.post("/templates", {
+        name: templateName.trim(),
+        scenario: letter.scenario,
+        content: letter.content,
+      });
+      toast.success("Template saved");
+      setShowSaveTemplate(false);
+      setTemplateName("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSavingTemplate(false);
     }
   }
 
@@ -175,6 +199,13 @@ export default function LetterViewPage() {
             <Copy size={13} />
             Copy
           </button>
+          <button
+            onClick={() => setShowSaveTemplate(true)}
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border hover:bg-accent transition-colors"
+          >
+            <Bookmark size={13} />
+            Save as Template
+          </button>
           {!isSent && (
             <button
               onClick={() => setShowSendConfirm(true)}
@@ -247,6 +278,41 @@ export default function LetterViewPage() {
             Generate a new letter for this client
           </Link>
         </p>
+      )}
+
+      {/* Save as template modal */}
+      {showSaveTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background rounded-lg shadow-xl w-full max-w-sm mx-4 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">Save as Template</h2>
+              <button onClick={() => setShowSaveTemplate(false)} className="text-muted-foreground hover:text-foreground">
+                <Loader2 size={14} className="hidden" />
+                ✕
+              </button>
+            </div>
+            <div className="space-y-1">
+              <Label>Template Name</Label>
+              <Input
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="e.g. Friendly Pre-Renewal"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleSaveTemplate()}
+              />
+              <p className="text-xs text-muted-foreground">
+                Saved to <Link href="/settings/templates" className="underline">Settings → Templates</Link>
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowSaveTemplate(false)}>Cancel</Button>
+              <Button size="sm" onClick={handleSaveTemplate} disabled={savingTemplate || !templateName.trim()}>
+                {savingTemplate ? <Loader2 size={13} className="animate-spin mr-1" /> : null}
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

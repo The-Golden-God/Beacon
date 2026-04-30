@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/settings/agency", label: "Agency Profile" },
   { href: "/settings/style", label: "Communication Style" },
+  { href: "/settings/templates", label: "Templates" },
   { href: "/settings/email", label: "Email Connection" },
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/notifications", label: "Notifications" },
