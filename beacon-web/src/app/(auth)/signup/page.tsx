@@ -146,11 +146,11 @@ export default function SignUpPage() {
               />
               <span className="text-sm text-slate-600">
                 I agree to the{" "}
-                <Link href="/terms-of-service" target="_blank" className="underline text-slate-800 hover:text-blue-600">
+                <Link href="/terms" target="_blank" className="underline text-slate-800 hover:text-blue-600">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy-policy" target="_blank" className="underline text-slate-800 hover:text-blue-600">
+                <Link href="/privacy" target="_blank" className="underline text-slate-800 hover:text-blue-600">
                   Privacy Policy
                 </Link>
               </span>
