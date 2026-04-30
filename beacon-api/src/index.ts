@@ -24,7 +24,21 @@ const app = Fastify({
 // ─── Plugins ──────────────────────────────────────────────────────────────────
 
 await app.register(helmet, {
-  contentSecurityPolicy: false,
+  // API only serves JSON — restrict everything by default
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 63072000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: { action: "deny" },
+  noSniff: true,
+  referrerPolicy: { policy: "no-referrer" },
 });
 
 await app.register(cors, {
