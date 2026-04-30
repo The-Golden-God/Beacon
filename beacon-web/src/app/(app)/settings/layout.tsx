@@ -11,6 +11,7 @@ const NAV = [
   { href: "/settings/email", label: "Email Connection" },
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/notifications", label: "Notifications" },
+  { href: "/settings/account", label: "Account" },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
