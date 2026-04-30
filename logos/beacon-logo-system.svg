@@ -1,0 +1,43 @@
+<svg width="680" height="520" viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="c1"><circle cx="150" cy="104" r="88"/></clipPath>
+    <clipPath id="c2"><circle cx="102" cy="354" r="88"/></clipPath>
+    <clipPath id="c3"><circle cx="510" cy="390" r="56"/></clipPath>
+  </defs>
+  <rect width="680" height="520" fill="white"/>
+
+  <!-- LIGHT LOCKUP -->
+  <circle cx="150" cy="104" r="88" fill="#0C1F3F"/>
+  <path d="M 94,98 A 64,64 0 0,1 206,98" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c1)"/>
+  <path d="M 110,110 A 44,44 0 0,1 190,110" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c1)"/>
+  <path d="M 126,122 A 24,24 0 0,1 174,122" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c1)"/>
+  <circle cx="150" cy="130" r="9" fill="#F5A623"/>
+  <circle cx="150" cy="130" r="4" fill="white"/>
+  <text x="262" y="122" font-family="'Helvetica Neue','Arial Black',Helvetica,Arial,sans-serif" font-size="76" font-weight="900" letter-spacing="-3" fill="#0C1F3F">Beacon</text>
+  <circle cx="614" cy="112" r="7" fill="#F5A623"/>
+  <text x="263" y="152" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" letter-spacing="4.5" fill="#8A9BB0">CLIENT RETENTION, AUTOMATED</text>
+  <text x="40" y="215" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11" letter-spacing="2.5" fill="#8A9BB0">LIGHT / PRIMARY</text>
+  <line x1="40" y1="232" x2="640" y2="232" stroke="#E0E4EA" stroke-width="0.75"/>
+
+  <!-- DARK LOCKUP -->
+  <rect x="0" y="240" width="680" height="220" fill="#0C1F3F"/>
+  <circle cx="102" cy="354" r="88" fill="white" opacity="0.06"/>
+  <path d="M 46,348 A 64,64 0 0,1 158,348" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c2)" opacity="0.9"/>
+  <path d="M 62,360 A 44,44 0 0,1 142,360" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c2)" opacity="0.9"/>
+  <path d="M 78,372 A 24,24 0 0,1 126,372" fill="none" stroke="white" stroke-width="13" stroke-linecap="round" clip-path="url(#c2)" opacity="0.9"/>
+  <circle cx="102" cy="380" r="9" fill="#F5A623"/>
+  <circle cx="102" cy="380" r="4" fill="white"/>
+  <text x="214" y="372" font-family="'Helvetica Neue','Arial Black',Helvetica,Arial,sans-serif" font-size="76" font-weight="900" letter-spacing="-3" fill="white">Beacon</text>
+  <circle cx="566" cy="362" r="7" fill="#F5A623"/>
+  <text x="215" y="402" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" letter-spacing="4.5" fill="#4A6280">CLIENT RETENTION, AUTOMATED</text>
+  <text x="40" y="452" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11" letter-spacing="2.5" fill="#4A6280">DARK / REVERSED</text>
+
+  <!-- FAVICON -->
+  <circle cx="510" cy="390" r="56" fill="white"/>
+  <path d="M 462,385 A 40,40 0 0,1 558,385" fill="none" stroke="#0C1F3F" stroke-width="9" stroke-linecap="round" clip-path="url(#c3)"/>
+  <path d="M 472,395 A 28,28 0 0,1 548,395" fill="none" stroke="#0C1F3F" stroke-width="9" stroke-linecap="round" clip-path="url(#c3)"/>
+  <path d="M 482,405 A 16,16 0 0,1 538,405" fill="none" stroke="#0C1F3F" stroke-width="9" stroke-linecap="round" clip-path="url(#c3)"/>
+  <circle cx="510" cy="412" r="7" fill="#F5A623"/>
+  <circle cx="510" cy="412" r="3" fill="white"/>
+  <text x="510" y="458" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11" letter-spacing="2" fill="#4A6280" text-anchor="middle">FAVICON / ICON</text>
+</svg>

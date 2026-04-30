@@ -1,0 +1,15 @@
+<svg width="640" height="180" viewBox="0 0 640 180" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="cd"><circle cx="90" cy="90" r="78"/></clipPath>
+  </defs>
+  <rect width="640" height="180" fill="#0C1F3F"/>
+  <circle cx="90" cy="90" r="78" fill="white" opacity="0.07"/>
+  <path d="M 38,84 A 58,58 0 0,1 142,84" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" clip-path="url(#cd)"/>
+  <path d="M 52,96 A 40,40 0 0,1 128,96" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" clip-path="url(#cd)"/>
+  <path d="M 66,108 A 22,22 0 0,1 114,108" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" clip-path="url(#cd)"/>
+  <circle cx="90" cy="116" r="8" fill="#F5A623"/>
+  <circle cx="90" cy="116" r="3.5" fill="white"/>
+  <text x="192" y="108" font-family="'Helvetica Neue','Arial Black',Helvetica,Arial,sans-serif" font-size="72" font-weight="900" letter-spacing="-3" fill="white">Beacon</text>
+  <circle cx="588" cy="98" r="7" fill="#F5A623"/>
+  <text x="193" y="136" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="11" font-weight="400" letter-spacing="4.5" fill="#4A6280">CLIENT RETENTION, AUTOMATED</text>
+</svg>

@@ -1,0 +1,18 @@
+# Google OAuth credentials files (never commit these)
+client_secret_*.json
+
+# Env files at any depth
+**/.env
+**/*.env.local
+
+# Dependencies
+**/node_modules/
+
+# Build output
+**/dist/
+**/.next/
+**/out/
+
+# OS
+.DS_Store
+Thumbs.db
