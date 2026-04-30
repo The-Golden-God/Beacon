@@ -5,6 +5,7 @@ import { db } from "../db/index.js";
 import { letters, clients, eoLog, workspaces, subscriptions, users } from "../db/schema.js";
 import { sendViaGmail } from "../lib/gmail.js";
 import { sendViaOutlook } from "../lib/outlook.js";
+import { safeDecrypt, encryptToken } from "../lib/crypto.js";
 import { requireAuth, requireWorkspace } from "../middleware/requireAuth.js";
 import { hashContent } from "../lib/utils.js";
 
@@ -242,12 +243,14 @@ export async function letterRoutes(app: FastifyInstance) {
         .where(eq(users.id, userId));
 
       if (method === "gmail") {
-        if (!sender.gmailAccessToken || !sender.gmailRefreshToken) {
+        const accessToken = safeDecrypt(sender.gmailAccessToken);
+        const refreshToken = safeDecrypt(sender.gmailRefreshToken);
+        if (!accessToken || !refreshToken) {
           return reply.status(400).send({ error: "Gmail not connected" });
         }
         const result = await sendViaGmail({
-          accessToken: sender.gmailAccessToken,
-          refreshToken: sender.gmailRefreshToken,
+          accessToken,
+          refreshToken,
           tokenExpiry: sender.gmailTokenExpiry,
           fromEmail: sender.gmailEmail!,
           toEmail: recipientEmail,
@@ -255,21 +258,22 @@ export async function letterRoutes(app: FastifyInstance) {
           body: letter.content,
         });
         externalMessageId = result.messageId;
-        // Persist refreshed token if Google rotated it
         if (result.newAccessToken) {
           await db.update(users).set({
-            gmailAccessToken: result.newAccessToken,
+            gmailAccessToken: encryptToken(result.newAccessToken),
             gmailTokenExpiry: result.newExpiry,
             updatedAt: new Date(),
           }).where(eq(users.id, userId));
         }
       } else {
-        if (!sender.outlookAccessToken || !sender.outlookRefreshToken) {
+        const accessToken = safeDecrypt(sender.outlookAccessToken);
+        const refreshToken = safeDecrypt(sender.outlookRefreshToken);
+        if (!accessToken || !refreshToken) {
           return reply.status(400).send({ error: "Outlook not connected" });
         }
         const result = await sendViaOutlook({
-          accessToken: sender.outlookAccessToken,
-          refreshToken: sender.outlookRefreshToken,
+          accessToken,
+          refreshToken,
           tokenExpiry: sender.outlookTokenExpiry,
           toEmail: recipientEmail,
           subject: letter.subject,
@@ -278,7 +282,7 @@ export async function letterRoutes(app: FastifyInstance) {
         externalMessageId = result.messageId;
         if (result.newAccessToken) {
           await db.update(users).set({
-            outlookAccessToken: result.newAccessToken,
+            outlookAccessToken: encryptToken(result.newAccessToken),
             outlookTokenExpiry: result.newExpiry,
             updatedAt: new Date(),
           }).where(eq(users.id, userId));

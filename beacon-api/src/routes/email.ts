@@ -6,6 +6,7 @@ import { users } from "../db/schema.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { getGmailAuthUrl, exchangeGmailCode } from "../lib/gmail.js";
 import { getOutlookAuthUrl, exchangeOutlookCode } from "../lib/outlook.js";
+import { encryptToken } from "../lib/crypto.js";
 
 const FRONTEND_URL = () => process.env.FRONTEND_URL ?? "http://localhost:3000";
 const SECRET = () => process.env.BETTER_AUTH_SECRET ?? "dev-secret";
@@ -57,8 +58,8 @@ export async function emailRoutes(app: FastifyInstance) {
     try {
       const { accessToken, refreshToken, expiry, email } = await exchangeGmailCode(query.code);
       await db.update(users).set({
-        gmailAccessToken: accessToken,
-        gmailRefreshToken: refreshToken,
+        gmailAccessToken: encryptToken(accessToken),
+        gmailRefreshToken: encryptToken(refreshToken),
         gmailTokenExpiry: expiry,
         gmailEmail: email,
         updatedAt: new Date(),
@@ -94,8 +95,8 @@ export async function emailRoutes(app: FastifyInstance) {
     try {
       const { accessToken, refreshToken, expiry, email } = await exchangeOutlookCode(query.code);
       await db.update(users).set({
-        outlookAccessToken: accessToken,
-        outlookRefreshToken: refreshToken,
+        outlookAccessToken: encryptToken(accessToken),
+        outlookRefreshToken: encryptToken(refreshToken),
         outlookTokenExpiry: expiry,
         outlookEmail: email,
         updatedAt: new Date(),
