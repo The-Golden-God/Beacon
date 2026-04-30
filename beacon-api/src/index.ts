@@ -4,6 +4,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import rawBody from "fastify-raw-body";
 import { auth } from "./lib/auth.js";
 import { authRoutes } from "./routes/auth.js";
 import { checkLoginRate } from "./lib/ratelimit.js";
@@ -48,6 +49,13 @@ await app.register(cors, {
 });
 
 await app.register(cookie);
+
+await app.register(rawBody, {
+  field: "rawBody",
+  global: false, // only on routes that opt in via config.rawBody = true
+  encoding: "utf8",
+  runFirst: true,
+});
 
 await app.register(rateLimit, {
   max: 100,

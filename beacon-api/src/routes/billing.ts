@@ -2,8 +2,9 @@ import type { FastifyInstance } from "fastify";
 import Stripe from "stripe";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { subscriptions, workspaces } from "../db/schema.js";
+import { subscriptions, workspaces, users } from "../db/schema.js";
 import { requireAuth, requireWorkspace, requireAdmin } from "../middleware/requireAuth.js";
+import { sendWelcomeEmail } from "../lib/email.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
@@ -66,28 +67,62 @@ export async function billingRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: "Invalid signature" });
     }
 
-    if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.created") {
-      const sub = event.data.object as Stripe.Subscription;
-      const workspaceId = sub.metadata.workspaceId;
-      if (workspaceId) {
+    // Checkout completed — first payment, link subscription to workspace
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const workspaceId = session.metadata?.workspaceId;
+      const subscriptionId = session.subscription as string | undefined;
+      if (workspaceId && subscriptionId) {
+        const stripeSub = await stripe.subscriptions.retrieve(subscriptionId) as any;
         await db.update(subscriptions).set({
-          stripeSubscriptionId: sub.id,
-          stripePriceId: (sub.items.data[0] as any)?.price?.id,
-          status: sub.status as any,
-          cancelAtPeriodEnd: sub.cancel_at_period_end,
+          stripeSubscriptionId: stripeSub.id,
+          stripePriceId: stripeSub.items?.data[0]?.price?.id,
+          status: stripeSub.status,
+          currentPeriodStart: stripeSub.current_period_start ? new Date(stripeSub.current_period_start * 1000) : undefined,
+          currentPeriodEnd: stripeSub.current_period_end ? new Date(stripeSub.current_period_end * 1000) : undefined,
+          cancelAtPeriodEnd: stripeSub.cancel_at_period_end ?? false,
           updatedAt: new Date(),
         }).where(eq(subscriptions.workspaceId, workspaceId));
+
+        // Send welcome email to workspace owner
+        const [owner] = await db
+          .select({ email: users.email, name: users.name })
+          .from(users)
+          .where(eq(users.workspaceId, workspaceId));
+        if (owner) {
+          const firstName = owner.name?.split(" ")[0] ?? "there";
+          await sendWelcomeEmail({ to: owner.email, firstName }).catch(() => {});
+        }
       }
     }
 
+    // Subscription updated (plan change, renewal, cancellation scheduled)
+    if (event.type === "customer.subscription.updated") {
+      const stripeSub = event.data.object as any;
+      const customerId = stripeSub.customer as string;
+      await db.update(subscriptions).set({
+        stripePriceId: stripeSub.items?.data[0]?.price?.id,
+        status: stripeSub.status,
+        currentPeriodStart: stripeSub.current_period_start ? new Date(stripeSub.current_period_start * 1000) : undefined,
+        currentPeriodEnd: stripeSub.current_period_end ? new Date(stripeSub.current_period_end * 1000) : undefined,
+        cancelAtPeriodEnd: stripeSub.cancel_at_period_end ?? false,
+        updatedAt: new Date(),
+      }).where(eq(subscriptions.stripeCustomerId, customerId));
+    }
+
+    // Subscription cancelled
     if (event.type === "customer.subscription.deleted") {
-      const sub = event.data.object as Stripe.Subscription;
-      const workspaceId = sub.metadata.workspaceId;
-      if (workspaceId) {
-        await db.update(subscriptions)
-          .set({ status: "canceled", updatedAt: new Date() })
-          .where(eq(subscriptions.workspaceId, workspaceId));
-      }
+      const stripeSub = event.data.object as Stripe.Subscription;
+      const customerId = stripeSub.customer as string;
+      await db.update(subscriptions)
+        .set({ status: "canceled", updatedAt: new Date() })
+        .where(eq(subscriptions.stripeCustomerId, customerId));
+    }
+
+    // Payment failed — log for now (email handled by Stripe's built-in dunning)
+    if (event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      console.error(`Payment failed for customer ${invoice.customer}: ${invoice.id}`);
     }
 
     return reply.send({ received: true });
