@@ -97,17 +97,17 @@ function AppSidebar({ user }: { user: AppUser }) {
   const { data: workspaceData } = useQuery({
     queryKey: ["workspace"],
     queryFn: () =>
-      api.get<{ workspace: { name: string }; subscription: { status: string; plan: string; trialLettersUsed: number; trialLettersLimit: number } }>("/workspace"),
+      api.get<{ workspace: { name: string; plan: string; subscriptionStatus: string; trialLettersUsed: number; trialLettersLimit: number } }>("/workspace"),
     enabled: !!user.workspaceId,
   });
 
-  const sub = workspaceData?.subscription;
+  const ws = workspaceData?.workspace;
   const isAdmin = user.role === "admin";
   const showAdminItems =
     isAdmin &&
-    (sub?.plan === "agency" || sub?.plan === "office");
-  const isTrialing = sub?.status === "trialing";
-  const lettersRemaining = sub ? sub.trialLettersLimit - sub.trialLettersUsed : null;
+    (ws?.plan === "agency" || ws?.plan === "office");
+  const isTrialing = ws?.subscriptionStatus === "trialing";
+  const lettersRemaining = ws ? ws.trialLettersLimit - ws.trialLettersUsed : null;
 
   async function handleSignOut() {
     await signOut();

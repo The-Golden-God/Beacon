@@ -44,9 +44,7 @@ interface WorkspaceData {
     name: string;
     signatureBlock?: string | null;
     eoDisclaimer?: string | null;
-  };
-  subscription: {
-    status: string;
+    subscriptionStatus: string;
     trialLettersUsed: number;
     trialLettersLimit: number;
   };
@@ -154,11 +152,18 @@ export default function NewLetterPage() {
     setWhatInsured("");
   }
 
+  const isTrialing = workspaceData?.workspace.subscriptionStatus === "trialing";
+  const trialUsed = workspaceData?.workspace.trialLettersUsed ?? 0;
+  const trialLimit = workspaceData?.workspace.trialLettersLimit ?? 10;
+  const trialExhausted = isTrialing && trialUsed >= trialLimit;
+  const trialRemaining = trialLimit - trialUsed;
+
   function canGenerate() {
     if (!selectedClient) return false;
     if (!policyType.trim()) return false;
     if (!renewalDate) return false;
     if (scenario === "rate_increase" && !rateIncrease) return false;
+    if (trialExhausted) return false;
     return true;
   }
 
@@ -166,7 +171,7 @@ export default function NewLetterPage() {
     if (!selectedClient || !canGenerate()) return;
 
     if (content) {
-      const isTrialing = workspaceData?.subscription.status === "trialing";
+      const isTrialing = workspaceData?.workspace.subscriptionStatus === "trialing";
       const trialWarning = isTrialing ? " This will use 1 of your remaining free letters and" : "";
       if (!confirm(`Regenerate?${trialWarning} This will replace your current letter.`)) return;
     }
@@ -218,8 +223,8 @@ export default function NewLetterPage() {
             if (data.done && data.letterId) {
               setLetterId(data.letterId);
               setSaveStatus("saved");
-              // Invalidate relevant queries
               queryClient.invalidateQueries({ queryKey: ["clients"] });
+              queryClient.invalidateQueries({ queryKey: ["workspace"] });
             }
             if (data.error) throw new Error(data.error);
           } catch {
@@ -572,27 +577,41 @@ export default function NewLetterPage() {
         </div>
 
         {/* Sticky Generate button */}
-        <div className="p-4 border-t bg-background">
-          <button
-            onClick={generate}
-            disabled={!canGenerate() || generating}
-            title={!canGenerate() ? "Fill in all required fields to generate" : undefined}
-            className={cn(
-              "w-full h-10 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2",
-              canGenerate() && !generating
-                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                : "bg-muted text-muted-foreground cursor-not-allowed"
-            )}
-          >
-            {generating ? (
-              <>
-                <Loader2 size={14} className="animate-spin" />
-                Generating…
-              </>
-            ) : (
-              "Generate Letter"
-            )}
-          </button>
+        <div className="p-4 border-t bg-background space-y-2">
+          {isTrialing && !trialExhausted && (
+            <p className="text-xs text-center text-muted-foreground">
+              {trialRemaining} free letter{trialRemaining === 1 ? "" : "s"} remaining
+            </p>
+          )}
+          {trialExhausted ? (
+            <Link
+              href="/settings/billing"
+              className="w-full h-10 rounded-md text-sm font-medium bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center gap-2 transition-colors"
+            >
+              Upgrade to Generate
+            </Link>
+          ) : (
+            <button
+              onClick={generate}
+              disabled={!canGenerate() || generating}
+              title={!canGenerate() ? "Fill in all required fields to generate" : undefined}
+              className={cn(
+                "w-full h-10 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2",
+                canGenerate() && !generating
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "bg-muted text-muted-foreground cursor-not-allowed"
+              )}
+            >
+              {generating ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Generating…
+                </>
+              ) : (
+                "Generate Letter"
+              )}
+            </button>
+          )}
         </div>
       </div>
 
