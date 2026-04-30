@@ -1,5 +1,15 @@
 import "dotenv/config";
+import * as Sentry from "@sentry/node";
 import Fastify from "fastify";
+
+// Initialize Sentry before anything else (no-ops gracefully if DSN is absent/placeholder)
+if (process.env.SENTRY_DSN && !process.env.SENTRY_DSN.endsWith("...")) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV ?? "development",
+    tracesSampleRate: 0.1,
+  });
+}
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
@@ -131,6 +141,17 @@ await app.register(templateRoutes, { prefix: "/api" });
 await app.register(billingRoutes, { prefix: "/api" });
 await app.register(teamRoutes, { prefix: "/api" });
 await app.register(emailRoutes, { prefix: "/api" });
+
+// ─── Error handler ────────────────────────────────────────────────────────────
+
+app.setErrorHandler((err: Error & { statusCode?: number }, request, reply) => {
+  if (err.statusCode && err.statusCode < 500) {
+    return reply.status(err.statusCode).send({ error: err.message });
+  }
+  Sentry.captureException(err, { extra: { url: request.url, method: request.method } });
+  app.log.error(err);
+  return reply.status(500).send({ error: "Internal server error" });
+});
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 
