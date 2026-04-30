@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db/index.js";
 import * as schema from "../db/schema.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./email.js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -38,8 +39,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      // TODO: wire to transactional email (Resend/Postmark)
-      console.log(`Password reset for ${user.email}: ${url}`);
+      await sendPasswordResetEmail({ to: user.email, url });
     },
   },
 
@@ -47,8 +47,8 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      // TODO: wire to transactional email
-      console.log(`Verify email for ${user.email}: ${url}`);
+      const firstName = user.name?.split(" ")[0] ?? "there";
+      await sendVerificationEmail({ to: user.email, firstName, url });
     },
   },
 

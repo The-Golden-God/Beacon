@@ -3,6 +3,7 @@ import { eq, and, isNull, gt } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { users, invites, letters, workspaces } from "../db/schema.js";
 import { requireAuth, requireWorkspace, requireAdmin } from "../middleware/requireAuth.js";
+import { sendTeamInviteEmail } from "../lib/email.js";
 import crypto from "crypto";
 
 export async function teamRoutes(app: FastifyInstance) {
@@ -105,8 +106,19 @@ export async function teamRoutes(app: FastifyInstance) {
       expiresAt,
     }).returning();
 
-    // TODO: send invite email with link ${process.env.FRONTEND_URL}/invite/${token}
-    console.log(`Invite link: ${process.env.FRONTEND_URL}/invite/${invite.token}`);
+    // Fetch inviter name + agency name for email
+    const [inviter] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId));
+    const [workspace] = await db.select({ name: workspaces.name }).from(workspaces).where(eq(workspaces.id, workspaceId));
+    const inviterFirstName = inviter?.name?.split(" ")[0] ?? "Your colleague";
+    const agencyName = workspace?.name ?? "the agency";
+
+    await sendTeamInviteEmail({
+      to: email,
+      inviterFirstName,
+      agencyName,
+      role,
+      token: invite.token,
+    });
 
     return reply.status(201).send({ invite: { id: invite.id, email: invite.email } });
   });
