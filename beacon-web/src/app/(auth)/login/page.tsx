@@ -5,7 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,10 @@ import { signIn, sendVerificationEmail } from "@/lib/auth-client";
 interface FormErrors {
   email?: string;
   password?: string;
+}
+
+interface LoginUser {
+  onboardingComplete?: boolean;
 }
 
 export default function LoginPage() {
@@ -69,7 +72,7 @@ export default function LoginPage() {
     }
 
     // Check onboarding status
-    const user = result.data?.user as any;
+    const user = result.data?.user as LoginUser | undefined;
     if (user?.onboardingComplete === false) {
       router.push("/onboarding/agency");
     } else {

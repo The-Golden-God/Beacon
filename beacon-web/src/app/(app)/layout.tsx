@@ -84,7 +84,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
-      <MobileBottomBar user={user} />
+      <MobileBottomBar />
     </div>
   );
 }
@@ -243,7 +243,7 @@ function SidebarNavItem({
   );
 }
 
-function MobileBottomBar({ user }: { user: AppUser }) {
+function MobileBottomBar() {
   const pathname = usePathname();
 
   return (

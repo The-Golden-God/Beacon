@@ -183,7 +183,7 @@ export default function OnboardingClientsPage() {
           {stage === "mapping" && (
             <>
               <div className="space-y-2">
-                {Object.entries(FIELD_MAP).map(([field, _]) => (
+                {Object.keys(FIELD_MAP).map((field) => (
                   <div key={field} className="flex items-center gap-2 text-sm">
                     <span className="w-32 text-muted-foreground capitalize">
                       {field.replace(/([A-Z])/g, " $1").trim()}

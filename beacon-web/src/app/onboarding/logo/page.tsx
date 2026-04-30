@@ -83,6 +83,7 @@ export default function OnboardingLogoPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 rounded-lg border p-4 bg-slate-50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview!}
                 alt="Logo preview"

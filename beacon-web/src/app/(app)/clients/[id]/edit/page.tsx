@@ -74,6 +74,7 @@ export default function EditClientPage() {
   useEffect(() => {
     if (clientData?.client && !initialized) {
       const c = clientData.client;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         firstName: c.firstName ?? "",
         lastName: c.lastName ?? "",

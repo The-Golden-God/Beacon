@@ -16,7 +16,6 @@ import {
   format,
   isSameMonth,
   isToday,
-  isSameDay,
   differenceInDays,
   parseISO,
 } from "date-fns";
@@ -344,7 +343,7 @@ function CalendarView({
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7">
-        {weeks.flatMap((week, wi) =>
+        {weeks.flatMap((week) =>
           week.map((day, di) => {
             const key = format(day, "yyyy-MM-dd");
             const dayClients = clientsByDay.get(key) ?? [];
@@ -480,32 +479,17 @@ function ListView({
     });
   }, [clients, sortField, sortDir]);
 
-  function SortTh({ field, label }: { field: SortField; label: string }) {
-    const active = sortField === field;
-    return (
-      <th
-        className="px-3 py-2 text-left text-xs font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap"
-        onClick={() => toggleSort(field)}
-      >
-        {label}{" "}
-        <span className={cn("text-muted-foreground/50", active && "text-foreground")}>
-          {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
-        </span>
-      </th>
-    );
-  }
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="border-b sticky top-0 bg-background">
           <tr>
-            <SortTh field="status" label="Status" />
-            <SortTh field="name" label="Client Name" />
-            <SortTh field="policy" label="Policy" />
-            <SortTh field="carrier" label="Carrier" />
-            <SortTh field="renewal" label="Renewal Date" />
-            <SortTh field="lastOutreach" label="Last Outreach" />
+            <SortTh field="status" label="Status" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+            <SortTh field="name" label="Client Name" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+            <SortTh field="policy" label="Policy" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+            <SortTh field="carrier" label="Carrier" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+            <SortTh field="renewal" label="Renewal Date" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+            <SortTh field="lastOutreach" label="Last Outreach" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
             <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Actions</th>
           </tr>
         </thead>
@@ -564,6 +548,32 @@ function ListView({
 
 // ─── Client Panel ─────────────────────────────────────────────────────────────
 
+function SortTh({
+  field,
+  label,
+  sortField,
+  sortDir,
+  onSort,
+}: {
+  field: SortField;
+  label: string;
+  sortField: SortField;
+  sortDir: SortDir;
+  onSort: (field: SortField) => void;
+}) {
+  const active = sortField === field;
+  return (
+    <th
+      className="px-3 py-2 text-left text-xs font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none whitespace-nowrap"
+      onClick={() => onSort(field)}
+    >
+      {label}{" "}
+      <span className={cn("text-muted-foreground/50", active && "text-foreground")}>
+        {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+      </span>
+    </th>
+  );
+}
 function ClientPanel({
   client,
   onClose,

@@ -1,14 +1,13 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Eye, EyeOff, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resetPassword } from "@/lib/auth-client";
 
 export default function ResetPasswordPage() {
@@ -22,12 +21,7 @@ export default function ResetPasswordPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
   const [loading, setLoading] = useState(false);
-  const [tokenExpired, setTokenExpired] = useState(false);
-
-  // Treat missing token as expired
-  useEffect(() => {
-    if (!token) setTokenExpired(true);
-  }, [token]);
+  const [tokenExpired, setTokenExpired] = useState(() => !token);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

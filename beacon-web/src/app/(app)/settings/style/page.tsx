@@ -35,6 +35,7 @@ export default function StyleSettingsPage() {
 
   useEffect(() => {
     if (data?.workspace && !initialized) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTone(data.workspace.agencyVoice ?? "inbetween");
       setSignoff(data.workspace.signoff ?? "Warm regards");
       setInitialized(true);

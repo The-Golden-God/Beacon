@@ -129,8 +129,6 @@ export default function ImportPage() {
     Object.values(mapping).includes(f.key)
   );
 
-  const preview = stage === "preview" ? buildPreview() : [];
-
   return (
     <div className="p-4 md:p-6 max-w-2xl pb-14 lg:pb-6">
       <div className="flex items-center gap-2 mb-6">

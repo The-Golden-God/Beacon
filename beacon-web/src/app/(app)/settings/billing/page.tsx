@@ -57,7 +57,7 @@ export default function BillingPage() {
   async function handleUpgrade(planId: string) {
     try {
       const res = await api.post<{ url: string }>("/billing/checkout", { plan: planId });
-      if (res.url) window.location.href = res.url;
+      if (res.url) window.location.assign(res.url);
     } catch {
       toast.error("Failed to start checkout.");
     }
@@ -66,7 +66,7 @@ export default function BillingPage() {
   async function handleManage() {
     try {
       const res = await api.post<{ url: string }>("/billing/portal", {});
-      if (res.url) window.location.href = res.url;
+      if (res.url) window.location.assign(res.url);
     } catch {
       toast.error("Failed to open billing portal.");
     }

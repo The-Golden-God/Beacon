@@ -47,6 +47,7 @@ export default function AgencySettingsPage() {
   useEffect(() => {
     if (data?.workspace && !initialized) {
       const w = data.workspace;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         name: w.name ?? "",
         agentName: w.agentName ?? "",

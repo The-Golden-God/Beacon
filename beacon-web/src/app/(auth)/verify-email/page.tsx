@@ -8,15 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { sendVerificationEmail } from "@/lib/auth-client";
 
 export default function VerifyEmailPage() {
-  const [email, setEmail] = useState("");
+  const [email] = useState(() =>
+    typeof window === "undefined"
+      ? ""
+      : sessionStorage.getItem("pendingVerifyEmail") ?? ""
+  );
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const stored = sessionStorage.getItem("pendingVerifyEmail");
-    if (stored) setEmail(stored);
-  }, []);
 
   useEffect(() => {
     if (cooldown <= 0) return;

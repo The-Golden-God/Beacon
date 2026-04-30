@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
@@ -69,7 +69,6 @@ const DEFAULT_DISCLAIMER =
 
 export default function NewLetterPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const preloadClientId = searchParams.get("clientId");
