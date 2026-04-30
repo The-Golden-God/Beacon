@@ -23,6 +23,7 @@
     "@fastify/rate-limit": "^10.3.0",
     "@neondatabase/serverless": "^1.1.0",
     "@sentry/node": "^10.51.0",
+    "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
     "better-auth": "^1.6.9",
     "bullmq": "^5.76.4",

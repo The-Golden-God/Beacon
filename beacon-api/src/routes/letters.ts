@@ -6,6 +6,7 @@ import { letters, clients, eoLog, workspaces, subscriptions, users } from "../db
 import { sendViaGmail } from "../lib/gmail.js";
 import { sendViaOutlook } from "../lib/outlook.js";
 import { safeDecrypt, encryptToken } from "../lib/crypto.js";
+import { checkLetterGenRate } from "../lib/ratelimit.js";
 import { requireAuth, requireWorkspace } from "../middleware/requireAuth.js";
 import { hashContent } from "../lib/utils.js";
 
@@ -42,6 +43,12 @@ export async function letterRoutes(app: FastifyInstance) {
       scenario: string;
       customInstructions?: string;
     };
+
+    // Rate limit: 100 generations per hour per workspace
+    const rateCheck = await checkLetterGenRate(workspaceId);
+    if (!rateCheck.allowed) {
+      return reply.status(429).send({ error: "Letter generation rate limit reached. Try again in an hour." });
+    }
 
     // Check trial limits
     const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.workspaceId, workspaceId));

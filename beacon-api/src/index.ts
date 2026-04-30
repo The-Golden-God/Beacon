@@ -6,6 +6,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import { auth } from "./lib/auth.js";
 import { authRoutes } from "./routes/auth.js";
+import { checkLoginRate } from "./lib/ratelimit.js";
 import { workspaceRoutes } from "./routes/workspaces.js";
 import { clientRoutes } from "./routes/clients.js";
 import { letterRoutes } from "./routes/letters.js";
@@ -38,6 +39,30 @@ await app.register(rateLimit, {
   max: 100,
   timeWindow: "1 minute",
   redis: undefined, // TODO: add Upstash Redis for distributed rate limiting in prod
+});
+
+// ─── Login rate limiting ──────────────────────────────────────────────────────
+// Applied before Better Auth handles /api/auth/sign-in/email
+
+app.addHook("onRequest", async (request, reply) => {
+  if (request.url !== "/api/auth/sign-in/email" || request.method !== "POST") return;
+  const body = request.body as { email?: string } | undefined;
+  const ip = (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim()
+    ?? request.socket.remoteAddress
+    ?? "unknown";
+
+  const checks = await Promise.all([
+    body?.email ? checkLoginRate(`email:${body.email}`) : Promise.resolve({ allowed: true, remaining: 999, reset: 0 }),
+    checkLoginRate(`ip:${ip}`),
+  ]);
+
+  const blocked = checks.find((c) => !c.allowed);
+  if (blocked) {
+    reply.status(429).send({
+      error: "Too many login attempts. Please wait before trying again.",
+      retryAfter: Math.ceil((blocked.reset - Date.now()) / 1000),
+    });
+  }
 });
 
 // ─── Better Auth handler ──────────────────────────────────────────────────────
