@@ -1,9 +1,11 @@
 # Google OAuth credentials files (never commit these)
 client_secret_*.json
 
-# Env files at any depth
+# Env files at any depth (allow .env.production — only contains public NEXT_PUBLIC_ vars)
 **/.env
 **/*.env.local
+**/.env.development.local
+**/.env.test.local
 
 # Dependencies
 **/node_modules/
