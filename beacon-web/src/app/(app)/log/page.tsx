@@ -5,9 +5,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Search, X } from "lucide-react";
+import { Search, X, Download, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 interface LogEntry {
   id: string;
@@ -35,6 +37,7 @@ export default function LogPage() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [loaded, setLoaded] = useState(PAGE_SIZE);
+  const [exporting, setExporting] = useState(false);
 
   const params = new URLSearchParams({ limit: "2000" });
   if (fromDate) params.set("from", fromDate);
@@ -68,6 +71,28 @@ export default function LogPage() {
     setSearch(""); setScenarioFilter(""); setFromDate(""); setToDate("");
   }
 
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const exportParams = new URLSearchParams();
+      if (fromDate) exportParams.set("from", fromDate);
+      if (toDate) exportParams.set("to", toDate);
+      const res = await fetch(`${API_BASE}/log/export?${exportParams.toString()}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `eo-log-${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="flex flex-col h-full pb-14 lg:pb-0">
       {/* Header */}
@@ -76,6 +101,14 @@ export default function LogPage() {
           <h1 className="text-base font-semibold">E&amp;O Log</h1>
           <p className="text-xs text-muted-foreground">Immutable record of all sent communications</p>
         </div>
+        <button
+          onClick={handleExport}
+          disabled={exporting || isLoading || allEntries.length === 0}
+          className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {exporting ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+          Export PDF
+        </button>
       </div>
 
       {/* Controls */}
